@@ -3,6 +3,7 @@
 This will leverage some scripts from the BEACON work I've done (specifically)
 ones that are used for reading in field fox data.  It will the plot the measured S11s.
 
+Sloppy coding below for quick plotting.
 '''
 
 import numpy
