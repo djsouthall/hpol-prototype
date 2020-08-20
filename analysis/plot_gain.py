@@ -22,6 +22,16 @@ import tools.field_fox as ff
 import matplotlib.pyplot as plt
 from matplotlib import lines
 
+
+params = {'legend.fontsize': 20,
+          'figure.figsize': (14, 6.5),
+         'axes.labelsize': 24,
+         'axes.titlesize':24,
+         'xtick.labelsize':24,
+         'ytick.labelsize':24}
+plt.rcParams.update(params)
+
+
 def gainFromS21(filename_logmag, distance_m,header=17):
     '''
     Calculates the gain from the S21 following the source:
@@ -56,23 +66,28 @@ def plotGain(distance_m):
 
 
     #PLOT PREPPING
-    fontsize=16
+    fontsize=20
     leg_fontsize=14
     alpha = 0.8
+    thickness = 4
     #PLOT Gain
     gain_plot = plt.figure()
     gain_ax = plt.subplot(1,1,1)
-    plt.ylabel('dBi',fontsize=fontsize)
-    plt.xlabel('MHz',fontsize=fontsize)
+    plt.ylabel('dBi')
+    plt.xlabel('MHz')
     plt.minorticks_on()
     plt.grid(b=True, which='major', color='k', linestyle='-')
     plt.grid(b=True, which='minor', color='tab:gray', linestyle='--',alpha=0.5)
-
     for infile in infiles:
         try:
 
             label = infile.split('/')[-1].replace('.csv','').replace('_PHASE','').replace('_LOGMAG','').replace('HOURGLASS','HOURGLASS ').replace('_',' ').title().replace('Pf',' pF').replace('Nh',' nH').replace('Ohm',' $\\Omega$').replace('Noshield','No Shield')
-
+            print(label)
+            print()
+            if 'Shield' in label:
+                continue
+            else:
+                label = 'Hpol Gain with 2.7 pF Shunt \nCapacitors and 100 nH Inductors'
             freqs, gain = gainFromS21(infile,distance_m,header=17)
             
             plot_cut_ll = 100            
@@ -84,13 +99,14 @@ def plotGain(distance_m):
                 linestyle = '-'
 
 
-            gain_ax.plot(freqs[plot_cut]/1e6, gain[plot_cut],label=label,alpha=alpha,linestyle=linestyle)#,color=color)
+            gain_ax.plot(freqs[plot_cut]/1e6, gain[plot_cut],linewidth=thickness,label=label,alpha=alpha,linestyle=linestyle)#,color=color)
+
 
         except Exception as e:
             print(e)
 
-
-    gain_ax.legend(fontsize=leg_fontsize)
+    plt.axhline(2.0,linewidth=thickness,linestyle='--',c=(112/256,173/256,71/256),label='2 dBi Line')
+    gain_ax.legend()
     gain_ax.set_xlim([plot_cut_ll,1000])
 
 if __name__ == '__main__':
