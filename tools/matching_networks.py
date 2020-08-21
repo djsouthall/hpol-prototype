@@ -59,7 +59,7 @@ class SmithMatcher:
             re, im = ff.magPhaseToReIm(self.adjusted_linmag,self.adjusted_unwrapped_phase)
             self.adjusted_complexs11 = re + 1.0j*im 
 
-
+            self.debug=False
         except Exception as e:
             print('\nError in %s'%inspect.stack()[0][3])
             print(e)
@@ -75,6 +75,20 @@ class SmithMatcher:
         self.adjusted_linmag = numpy.copy(self.linmag)
         self.adjusted_unwrapped_phase = numpy.copy(self.unwrapped_phase)
         self.adjusted_complexs11 = numpy.copy(self.complexs11)
+
+    def forceNewInitialS11(self):
+        '''
+        This will set the current adjusted as the "original" input response.  This change cannot be undone, as it
+        overwrites the normal touchpoint for self.reset.  This could be helpful if you wanted to test the effects of
+        varying values with an assumed additional offset (for instance artificially adding resistance), but should be
+        used with caution.
+        '''
+        print('Warning:  The initial S11 for this feed has been overwritten with current adjusted values.')
+        self.logmag = numpy.copy(self.adjusted_logmag)
+        self.linmag = numpy.copy(self.adjusted_linmag)
+        self.unwrapped_phase = numpy.copy(self.adjusted_unwrapped_phase)
+        self.complexs11 = numpy.copy(self.adjusted_complexs11)
+
 
 
     def plotCurrentLogMagS11(self,ax=None,fontsize=16,leg_fontsize=14,label=''):
@@ -108,6 +122,9 @@ class SmithMatcher:
 
     def plotSmithChart(self,ax=None,fontsize=16,leg_fontsize=14,label=''):
         try:
+            plot_cut_ll = 100            
+            plot_cut = self.freqs/1e6 > plot_cut_ll
+            
             if ax is None:
                 #PLOT PREPPING
                 _fig = plt.figure()
@@ -133,7 +150,7 @@ class SmithMatcher:
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
 
-    def addRLC(self, part, val):
+    def addRLC(self, part, val, verbose=False):
         '''
         This will shift the reflection coefficient from the existing most recent adjusted logmag, phase, to the new
         appropriate value. 
@@ -142,53 +159,66 @@ class SmithMatcher:
         '''
         #Z = R + iX
         #Y = 1/Z = G + iB
-        z = ff.logToComplexZ(self.adjusted_logmag, self.unwrapped_phase, z_0 = self.z_0 )
-        norm_z = z/self.z_0
-        if part == 'sr':
-            #R += val/self.z_0
-            #Series resistor
-            print('Adding Series resistor')
-            norm_z += val/self.z_0
-            out_z = norm_z*self.z_0
-        elif part == 'pr':
-            #Parallel resistor
-            print('Adding Parallel resistor')
-            norm_y = 1.0/norm_z
-            norm_y += self.z_0/val
-            norm_z = 1.0/norm_y
-            out_z = norm_z*self.z_0
-        elif part == 'sc':
-            #Series capacitor
-            print('Adding Series capacitor')
-            norm_z -= 1.0j /(2.0*numpy.pi*self.freqs*val*self.z_0)
-            out_z = norm_z*self.z_0
-        elif part == 'pc':
-            #Parallel capacitor
-            print('Adding Parallel capacitor')
-            norm_y = 1.0/norm_z
-            norm_y += 1.0j * (2.0*numpy.pi*self.freqs*val*self.z_0)
-            norm_z = 1.0/norm_y
-            out_z = norm_z*self.z_0
-        elif part == 'sl':
-            #Series inductor
-            print('Adding Series inductor')
-            norm_z += 1.0j * (2.0*numpy.pi*self.freqs*val)/(self.z_0)
-            out_z = norm_z*self.z_0
-        elif part == 'pl':
-            #Parallel inductor
-            print('Adding Parallel inductor')
-            norm_y = 1.0/norm_z
-            norm_y -= 1.0j * self.z_0/(2.0*numpy.pi*self.freqs*val)
-            norm_z = 1.0/norm_y
-            out_z = norm_z*self.z_0
-        else:
-            print('COMPONENT NOT ADDED, VALUE NOT ACCEPTED.')
+        try:
+            z = ff.logToComplexZ(self.adjusted_logmag, self.adjusted_unwrapped_phase )
+            norm_z = z/self.z_0
+            if part == 'sr':
+                #R += val/self.z_0
+                #Series resistor
+                if verbose:
+                    print('Adding Series resistor')
+                norm_z += val/self.z_0
+                out_z = norm_z*self.z_0
+            elif part == 'pr':
+                #Parallel resistor
+                if verbose:
+                    print('Adding Parallel resistor')
+                norm_y = 1.0/norm_z
+                norm_y += self.z_0/val
+                norm_z = 1.0/norm_y
+                out_z = norm_z*self.z_0
+            elif part == 'sc':
+                #Series capacitor
+                if verbose:
+                    print('Adding Series capacitor')
+                norm_z -= 1.0j /(2.0*numpy.pi*self.freqs*val*self.z_0)
+                out_z = norm_z*self.z_0
+            elif part == 'pc':
+                #Parallel capacitor
+                if verbose:
+                    print('Adding Parallel capacitor')
+                norm_y = 1.0/norm_z
+                norm_y += 1.0j * (2.0*numpy.pi*self.freqs*val*self.z_0)
+                norm_z = 1.0/norm_y
+                out_z = norm_z*self.z_0
+            elif part == 'sl':
+                #Series inductor
+                if verbose:
+                    print('Adding Series inductor')
+                norm_z += 1.0j * (2.0*numpy.pi*self.freqs*val)/(self.z_0)
+                out_z = norm_z*self.z_0
+            elif part == 'pl':
+                #Parallel inductor
+                if verbose:
+                    print('Adding Parallel inductor')
+                norm_y = 1.0/norm_z
+                norm_y -= 1.0j * self.z_0/(2.0*numpy.pi*self.freqs*val)
+                norm_z = 1.0/norm_y
+                out_z = norm_z*self.z_0
+            else:
+                print('COMPONENT NOT ADDED, VALUE NOT ACCEPTED.')
 
-        self.adjusted_complexs11 = (out_z - self.z_0)/(out_z + self.z_0)
+            self.adjusted_complexs11 = (out_z - self.z_0)/(out_z + self.z_0)
 
-        self.adjusted_linmag = numpy.abs(self.adjusted_complexs11)
-        self.adjusted_logmag = ff.linToLogMag(self.adjusted_linmag)
-        self.unwrapped_phase = numpy.unwrap(numpy.angle(self.adjusted_complexs11))
+            self.adjusted_linmag = numpy.abs(self.adjusted_complexs11)
+            self.adjusted_logmag = ff.linToLogMag(self.adjusted_linmag)
+            self.adjusted_unwrapped_phase = numpy.unwrap(numpy.angle(self.adjusted_complexs11))
+        except Exception as e:
+            print('\nError in %s'%inspect.stack()[0][3])
+            print(e)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
 
 
 
@@ -223,18 +253,35 @@ class HpolTriWingFeed(SmithMatcher):
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
 
-    def addShuntInductor(self, val):
+    def addShuntInductor(self, val, resistance=0):
         '''
         This will do the math to emulate adding 3 shunt inductors of the given value (assumed usits of H), one inductor
         per wing of the center feed.
+
+        The kwarg for resistance allows you to attempt to account for the added resistance from the inductor as 
+        described on the spec sheet.  Beacuse we are talking about a resistance intrinsic to the inductor, it is also
+        assumed to be added in parallel to the load.  
         ''' 
-        self.addRLC('pl',val/3.0)
+        print('WARNING THIS NEEDS TO BE DOUBLE CHECKED')
+        for wing in range(3):
+            self.addRLC('pl',val)
+            if resistance != 0:
+                print('HERE')
+                self.addRLC('pr',resistance)
     def addSeriesCapacitor(self, val):
         '''
         This will do the math to emulate adding adding additional capacitance to the network, assuming you are adding 6
         capacitors, in 3 parallel groups of 2 in series capacitors.
         ''' 
-        self.addRLC('pl',3.0*val/2.0)
+        for wing in range(3):
+            self.addRLC('pl',val/2.0)
+
+    def getPercentBelow(self, db=-5):
+        '''
+        This will return the percentage of points in the band that are below the given db value.  This will be 
+        calculated using the adjusted S11 logmag curve.
+        '''
+        return sum(self.adjusted_logmag < db)/len(self.adjusted_logmag)
 
 
 if __name__ == '__main__':
