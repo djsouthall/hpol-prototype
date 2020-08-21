@@ -212,7 +212,8 @@ class SmithMatcher:
 
             self.adjusted_linmag = numpy.abs(self.adjusted_complexs11)
             self.adjusted_logmag = ff.linToLogMag(self.adjusted_linmag)
-            self.adjusted_unwrapped_phase = numpy.unwrap(numpy.angle(self.adjusted_complexs11))
+            self.adjusted_unwrapped_phase = numpy.unwrap(numpy.angle(self.adjusted_complexs11,deg=True),discont=360.0)
+
         except Exception as e:
             print('\nError in %s'%inspect.stack()[0][3])
             print(e)
@@ -262,7 +263,6 @@ class HpolTriWingFeed(SmithMatcher):
         described on the spec sheet.  Beacuse we are talking about a resistance intrinsic to the inductor, it is also
         assumed to be added in parallel to the load.  
         ''' 
-        print('WARNING THIS NEEDS TO BE DOUBLE CHECKED')
         for wing in range(3):
             self.addRLC('pl',val)
             if resistance != 0:
