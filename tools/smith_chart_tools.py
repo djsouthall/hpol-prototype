@@ -14,9 +14,8 @@ import csv
 import inspect
 import glob
 
-sys.path.append(os.environ['BEACON_ANALYSIS_DIR'])
-import tools.field_fox as ff
-from pySmith import get_smith
+from beacon.tools import field_fox as ff
+from hpol_prototype.tools.pySmith import get_smith
 
 import matplotlib.pyplot as plt
 from matplotlib import lines
@@ -44,8 +43,8 @@ class SmithMatcher:
     '''
     def __init__(self, freqs, logmag, unwrapped_phase, z_0=50):
         try:
-            self.freqs = freqs
-            self.logmag = logmag
+            self.freqs = numpy.copy(freqs)
+            self.logmag = numpy.copy(logmag)
             self.linmag = ff.logMagToLin(self.logmag)
             self.unwrapped_phase = unwrapped_phase
             re, im = ff.magPhaseToReIm(self.linmag,self.unwrapped_phase)
@@ -54,10 +53,9 @@ class SmithMatcher:
 
 
             #These will be updated any time a component is added. 
-            self.adjusted_logmag = logmag
+            self.adjusted_logmag = numpy.copy(logmag)
             self.adjusted_linmag = ff.logMagToLin(self.adjusted_logmag)
             self.adjusted_unwrapped_phase = unwrapped_phase
-            self.unwrapped_phase = unwrapped_phase
             re, im = ff.magPhaseToReIm(self.adjusted_linmag,self.adjusted_unwrapped_phase)
             self.adjusted_complexs11 = re + 1.0j*im 
 
@@ -68,6 +66,16 @@ class SmithMatcher:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
+
+    def reset(self):
+        '''
+        This will set all adjusted values back to the original initiated values.
+        '''
+        self.adjusted_logmag = numpy.copy(self.logmag)
+        self.adjusted_linmag = numpy.copy(self.linmag)
+        self.adjusted_unwrapped_phase = numpy.copy(self.unwrapped_phase)
+        self.adjusted_complexs11 = numpy.copy(self.complexs11)
+
 
     def plotCurrentLogMagS11(self,ax=None,fontsize=16,leg_fontsize=14,label=''):
         try:
@@ -231,7 +239,7 @@ class HpolTriWingFeed(SmithMatcher):
 
 if __name__ == '__main__':
     plt.close('all')
-    datapath ='/home/dsouthall/Projects/Greenland/hpol-prototype/data/hpol_copper_tab_testing_aug2020/s11/'
+    datapath ='/home/dsouthall/Projects/Greenland/hpol_prototype/data/hpol_copper_tab_testing_aug2020/s11/'
     infiles = numpy.array(glob.glob(datapath + '*.csv'))
     roots = numpy.unique([infile.replace('_PHASE','_FILLER').replace('_LOGMAG','_FILLER') for infile in infiles])
 
