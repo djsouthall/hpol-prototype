@@ -229,7 +229,8 @@ if __name__ == '__main__':
         best_cu_ax_lm.grid(b=True, which='major', color='k', linestyle='-',alpha=0.75)
         best_cu_ax_lm.grid(b=True, which='minor', color='tab:gray', linestyle='--',alpha=0.25)
 
-        best_cu_roots = ['/home/dsouthall/Projects/Greenland/hpol_prototype/data/hpol_copper_tab_testing_aug2020/s11/hpol_davebee_27nh_2p7pf_FILLER.csv']
+        best_cu_roots = ['/home/dsouthall/Projects/Greenland/hpol_prototype/data/hpol_copper_tab_testing_aug2020/s11/hpol_davebee_27nh_2p7pf_FILLER.csv',
+                        '/home/dsouthall/Projects/Greenland/hpol_prototype/data/hpol_copper_tab_testing_aug2020/s11/hpol_chuckape_27nh_2p7pf_FILLER.csv']
         for root_index, root in enumerate(best_cu_roots):
             if root in cu_roots:
                 linestyle = cu_linestyle

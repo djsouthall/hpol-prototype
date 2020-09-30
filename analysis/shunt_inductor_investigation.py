@@ -140,6 +140,9 @@ def makeGeneralPlots3():
             datapath ='/home/dsouthall/Projects/Greenland/hpol_prototype/data/hpol_al_tube_testing_sep2020/s11/'
             starter_root_match = 'hpol_ernieemu_100nh_2p7pf'
         elif False:
+            datapath ='/home/dsouthall/Projects/Greenland/hpol_prototype/data/hpol_al_tube_testing_sep2020/s11/'
+            starter_root_match = 'hpol_ernieemu_22nh_2p7pF'
+        elif False:
             datapath ='/home/dsouthall/Projects/Greenland/hpol_prototype/data/hpol_copper_tab_testing_aug2020/s11/'
             starter_root_match = 'hpol_ape_110nh_2p7pf'
         elif False:
@@ -161,18 +164,25 @@ def makeGeneralPlots3():
             datapath ='/home/dsouthall/Projects/Greenland/hpol_prototype/data/hpol_copper_tab_testing_aug2020/s11/'
             starter_root_match = 'hpol_bee_NOSHUNT_2p7pF'
 
+        #starter_root_match = datapath + starter_root_match + '_FILLER.csv'
+
         #inductor_values_nH = numpy.linspace(15,250,300)
         inductor_values_of_interest = numpy.array([])
-        inductor_values_nH = numpy.linspace(1.0,150.0,150)#numpy.array([47.0,56,100,110])
+        inductor_values_nH = numpy.linspace(1.0,100.0,300)#numpy.array([47.0,56,100,110])
         test_statistic = numpy.zeros_like(inductor_values_nH)
         
-        cap_values_pF = numpy.linspace(1.0,15.0,300)
+        cap_values_pF = numpy.linspace(1.0,10.0,300)
         cap_values_of_interest = numpy.array([])
         test_statistic_cap = numpy.zeros_like(cap_values_pF)
-        
+        fontsize=16
+
+
         db_cut = -4 #dB
-        freq_low_cut_MHz=100
+        freq_low_cut_MHz=200
         freq_high_cut_MHz=800
+        test_C = 4.7 #pF
+        test_L = 47 #nH
+
 
 
         #Prep calculations
@@ -216,15 +226,24 @@ def makeGeneralPlots3():
         mesh_ax = plt.gca()
         im = mesh_ax.pcolormesh(mesh_L, mesh_C, mesh_ts, vmin=None, vmax=None,cmap=plt.cm.coolwarm)
         cbar = fig.colorbar(im)
-        cbar.set_label('Fraction of S11 Points below %0.2f dB'%db_cut)
-        plt.xlabel('Individual Swapped Shunt Inductor Values (nH)')
-        plt.ylabel('Individual Swapped Series Cap Values (pF)')
+        cbar.set_label('Fraction of S11 Points below %0.2f dB [%i - %i MHz]'%(db_cut,freq_low_cut_MHz,freq_high_cut_MHz),fontsize=fontsize)
+        plt.xlabel('Individual Swapped Shunt Inductor Values (nH)',fontsize=fontsize)
+        plt.ylabel('Individual Swapped Series Cap Values (pF)',fontsize=fontsize)
         #plt.zlabel('Fraction of S11 Points below %0.2f dB'%db_cut)
         plt.minorticks_on()
         plt.grid(b=True, which='major', color='k', linestyle='-',alpha=0.75)
         plt.grid(b=True, which='minor', color='tab:gray', linestyle='--',alpha=0.25)
         plt.axhline(2.7,linestyle='--',c='k')
         feed.reset()
+
+        #TEMPORARY TEST OF CAP VALUES 
+        feed.reset()
+        feed.swapRLC('sc',test_C*1.0e-12)
+        feed.swapRLC('pl',test_L*1.0e-9)
+        feed.plotCurrentLogMagS11(label='C = %0.2f, L = %0.2f '%(test_C,test_L),plot_cut_ll=0,plot_cut_ul=1500)
+        feed.plotSmithChart(label='C = %0.2f, L = %0.2f '%(test_C,test_L),plot_cut_ll=0,plot_cut_ul=1500)
+        feed.reset()
+
     
         for index, C in enumerate(cap_values_pF):
             feed.swapRLC('sc',C*1.0e-12)
@@ -258,12 +277,12 @@ def makeGeneralPlots3():
         curve_ax = plt.gca()
         plt.plot(inductor_values_nH, test_statistic,label='Predicted Curve from Varying %.2f nH Feed'%(starter_shunt_inductor_value*1e9))
         plt.xlabel('Individual Added Shunt Inductor Values (nH)')
-        plt.ylabel('Fraction of S11 Points below %0.2f dB'%db_cut)
+        plt.ylabel('Fraction of S11 Points below %0.2f dB [%i - %i MHz]'%(db_cut,freq_low_cut_MHz,freq_high_cut_MHz))
         plt.minorticks_on()
         plt.grid(b=True, which='major', color='k', linestyle='-',alpha=0.75)
         plt.grid(b=True, which='minor', color='tab:gray', linestyle='--',alpha=0.25)
         feed.reset()
-        plt.axhline(feed.getPercentBelow(db=db_cut),c='r',linestyle='--',label='Measured %.2f nH Fraction'%(starter_shunt_inductor_value*1e9))
+        plt.axhline(feed.getPercentBelow(db=db_cut,freq_low_cut_MHz=freq_low_cut_MHz,freq_high_cut_MHz=freq_high_cut_MHz),c='r',linestyle='--',label='Measured %.2f nH Fraction'%(starter_shunt_inductor_value*1e9))
 
         measured_test_statistic = numpy.zeros(len(roots))
         measured_inductor_values_nH = numpy.zeros(len(roots))
@@ -280,7 +299,7 @@ def makeGeneralPlots3():
             freqs, logmag_vals = ff.readerFieldFox(logmag_infile,header=17)
             freqs, phase_vals = ff.readerFieldFox(phase_infile,header=17)
             measured_feed = SmithMatcher(freqs, logmag_vals, phase_vals, initial_capacitor_value=C*1e-12, initial_shunt_inductor_value=L*1e-9, z_0=50)
-            measured_test_statistic[index] = measured_feed.getPercentBelow(db=db_cut)
+            measured_test_statistic[index] = measured_feed.getPercentBelow(db=db_cut,freq_low_cut_MHz=freq_low_cut_MHz,freq_high_cut_MHz=freq_high_cut_MHz)
             #measured_feed.plotCurrentLogMagS11(label=root)
             
             feed.reset()

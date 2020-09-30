@@ -124,7 +124,7 @@ class SmithMatcher:
         cut = numpy.logical_and(self.freqs >= freq_low_cut_MHz, self.freqs <= freq_high_cut_MHz)
         return sum(self.adjusted_logmag < db)/len(self.adjusted_logmag)
 
-    def plotCurrentLogMagS11(self,ax=None,fontsize=16,leg_fontsize=14,label='',plot_cut_ll=100,plot_cut_ul=1500):
+    def plotCurrentLogMagS11(self,ax=None,fontsize=16,leg_fontsize=14,label='',plot_cut_ll=0,plot_cut_ul=1500):
         try:
             plot_cut = numpy.logical_and(self.freqs/1e6 > plot_cut_ll, self.freqs/1e6 <= plot_cut_ul)
 
@@ -152,7 +152,7 @@ class SmithMatcher:
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
 
-    def plotSmithChart(self,ax=None,fontsize=16,leg_fontsize=14,label='',plot_cut_ll=100,plot_cut_ul=1000):
+    def plotSmithChart(self,ax=None,linestyle='-',fontsize=16,leg_fontsize=14,label='',plot_cut_ll=0,plot_cut_ul=1500):
         try:
             plot_cut = numpy.logical_and(self.freqs/1e6 > plot_cut_ll, self.freqs/1e6 <= plot_cut_ul)
             
@@ -170,7 +170,7 @@ class SmithMatcher:
                 _ax = ax
                 print('Using predefined ax')
 
-            _ax.plot(numpy.real(self.adjusted_complexs11)[plot_cut], numpy.imag(self.adjusted_complexs11)[plot_cut],label=label,alpha=1.0,linestyle='-')#,color=color)
+            _ax.plot(numpy.real(self.adjusted_complexs11)[plot_cut], numpy.imag(self.adjusted_complexs11)[plot_cut],label=label,alpha=1.0,linestyle=linestyle)#,color=color)
             _ax.legend(loc='upper right')
 
             return _ax
