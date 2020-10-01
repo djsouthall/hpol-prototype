@@ -183,12 +183,16 @@ if __name__ == '__main__':
                 linestyle = al_linestyle
 
             #Cap and inductor values
+            antenna_name = root.split('/')[-1].split('_')[1]
             shunt_inductor_value = root.split('/')[-1].split('_')[2] #nH
             if shunt_inductor_value.lower() == 'noshunt':
                 shunt_inductor_value = 0
             else:
                 shunt_inductor_value = float(shunt_inductor_value.lower().replace('nh',''))*1e-9 #H
             cap_value = float(root.split('/')[-1].split('_')[3].lower().replace('pf','').replace('p','.'))*1e-12 #F
+
+            # if shunt_inductor_value != 100*1e-9:
+            #     continue
 
             #Load data
             logmag_infile = root.replace('_FILLER','_LOGMAG')
@@ -200,11 +204,11 @@ if __name__ == '__main__':
             #Make feed, incase I want to plot Smith plot later.
             feed = SmithMatcher(freqs, logmag_vals, phase_vals, initial_capacitor_value=cap_value, initial_shunt_inductor_value=shunt_inductor_value, z_0=50)
 
-            al_ax_lm.plot(freqs/1e6, logmag_vals,linestyle = linestyle,linewidth=linewidth,alpha=alpha,label='Series C\'s = %.1f pF, Shunt L = %i nH'%(cap_value*1e12,shunt_inductor_value*1e9))
+            al_ax_lm.plot(freqs/1e6, logmag_vals,linestyle = linestyle,linewidth=linewidth,alpha=alpha,label='Series C\'s = %.1f pF, Shunt L = %i nH, %s'%(cap_value*1e12,shunt_inductor_value*1e9,antenna_name))
             if plot_smith == True:
                 al_ax_sm = feed.plotSmithChart(ax=al_ax_sm,linestyle=linestyle)
 
-        al_ax_lm.set_xlim(0,1000)
+        al_ax_lm.set_xlim(0,1500)
         al_ax_lm.legend(fontsize=legend_fontsize,loc='lower left')
 
 
