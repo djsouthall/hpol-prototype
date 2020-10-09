@@ -1,5 +1,5 @@
 # rnog-hpol-prototype
-This contains code and data created while working towards a finalized hpol antenna for RNO-G.
+This contains code, data, and design files created while working towards a finalized hpol antenna for RNO-G.
 
 I use some functions that are defined from another package: [plot_ff.py](https://github.com/djsouthall/beacon/blob/master/tools/plot_ff.py).  These aren't complicated and could easily be redifined in this project, but I am the only one using it and this is fine for me. 
 
