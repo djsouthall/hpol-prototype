@@ -1,0 +1,94 @@
+EESchema-LIBRARY Version 2.4
+#encoding utf-8
+#
+# Transformer_ADT4-6T
+#
+DEF Transformer_ADT4-6T TR 0 20 Y N 1 F N
+F0 "TR" 0 250 50 H V C CNN
+F1 "Transformer_ADT4-6T" 0 -250 50 H V C CNN
+F2 "Package_SO:Mini-Circuits_CD637_H5.23mm" 0 -350 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+ALIAS ADT2-71T ADT4-5WT ADT4-6T ADT8-1T ADT16-6T
+$FPLIST
+ Mini?Circuits*CD637*
+$ENDFPLIST
+DRAW
+A -60 -90 30 -899 899 0 1 8 N -60 -120 -60 -60
+A -60 -30 30 -899 899 0 1 8 N -60 -60 -60 0
+A -60 30 30 -899 899 0 1 8 N -60 0 -60 60
+A -60 90 30 -899 899 0 1 8 N -60 60 -60 120
+A 60 -90 30 901 -901 0 1 8 N 60 -60 60 -120
+A 60 -30 30 901 -901 0 1 8 N 60 0 60 -60
+A 60 30 30 901 -901 0 1 8 N 60 60 60 0
+A 60 90 30 901 -901 0 1 8 N 60 120 60 60
+P 2 0 1 6 100 0 50 0 N
+P 4 0 1 6 -100 200 -60 200 -60 120 -60 120 N
+P 4 0 1 6 -60 -120 -60 -200 -100 -200 -100 -200 N
+P 4 0 1 6 60 120 60 200 100 200 100 200 N
+P 4 0 1 6 100 -200 60 -200 60 -120 60 -120 N
+X ~ 1 -200 -200 100 R 50 50 1 1 P
+X ~ 3 -200 200 100 R 50 50 1 1 P
+X ~ 4 200 200 100 L 50 50 1 1 P
+X ~ 5 200 0 100 L 50 50 1 1 P
+X ~ 6 200 -200 100 L 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# eo_Resistors_R0603
+#
+DEF eo_Resistors_R0603 R 0 0 N Y 1 F N
+F0 "R" 100 0 50 V V C CNN
+F1 "eo_Resistors_R0603" -100 0 50 V V C CNN
+F2 "eo-footprints:0603_R" 350 0 50 V I C CNN
+F3 "" 100 0 50 V I C CNN
+F4 "RES 1%  0603 (1608 Metric) " 500 150 50 V I C CNN "Description"
+$FPLIST
+ R_*
+$ENDFPLIST
+DRAW
+P 2 0 1 0 0 -90 0 -100 N
+P 2 0 1 0 0 90 0 100 N
+P 5 0 1 0 0 -30 40 -45 0 -60 -40 -75 0 -90 N
+P 5 0 1 0 0 30 40 15 0 0 -40 -15 0 -30 N
+P 5 0 1 0 0 90 40 75 0 60 -40 45 0 30 N
+X ~ 1 0 150 50 D 50 50 1 1 P
+X ~ 2 0 -150 50 U 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# eo_connectors_CONSMA002-L
+#
+DEF eo_connectors_CONSMA002-L J 0 40 Y Y 1 F N
+F0 "J" -50 50 50 H V R CNN
+F1 "eo_connectors_CONSMA002-L" 50 -100 50 H V L CNN
+F2 "eo-footprints:RF_SMA_RightAngle" 200 200 60 H I L CNN
+F3 "" 200 300 60 H I L CNN
+F4 "Connectors, Interconnects" 200 600 60 H I L CNN "Category"
+F5 "Coaxial Connectors (RF)" 200 700 60 H I L CNN "Family"
+F6 " CONN SMA RCPT STR 50OHM RA" 200 1000 60 H I L CNN "Description"
+F7 "Active" 200 1200 60 H I L CNN "Status"
+F8 "CONSMA003-L " 450 550 50 H I C CNN "Part Number"
+F9 "Linx Tech." 550 650 50 H I C CNN "Manufacturer"
+DRAW
+A 2 -1 52 1789 -266 1 1 0 N -50 0 50 -25
+A 3 1 53 271 -1789 1 1 0 N 50 25 -50 0
+C 0 0 25 1 1 0 N
+X ~ 1 0 -200 145 U 50 50 1 1 P
+X ~ 2 200 0 175 L 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# eo_sch_symbols_GND
+#
+DEF eo_sch_symbols_GND #PWR 0 0 Y Y 1 F P
+F0 "#PWR" 0 -250 50 H I C CNN
+F1 "eo_sch_symbols_GND" 0 -150 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+P 6 0 1 0 0 0 0 -50 50 -50 0 -100 -50 -50 0 -50 N
+X GND 1 0 0 0 D 50 50 1 1 W N
+ENDDRAW
+ENDDEF
+#
+#End Library
