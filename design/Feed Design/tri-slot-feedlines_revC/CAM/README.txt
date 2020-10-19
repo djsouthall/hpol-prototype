@@ -1,10 +1,10 @@
 ---BOARD SPECIFICATIONS---
-File: tri-slot-feedlines_revB_CAM
-Date: 12-Dec. 2019
-Designer: Eric Oberla <ejo@uchicago.edu>
+File: tri-slot-feedlines_revC_CAM
+Date: 19-Oct. 2020
+Designer: Eric Oberla <ejo@uchicago.edu> / Dan Southall <dsouthall@uchicago.edu>
 --------------------------
 
-Board outer dimensions : 52.75 mm x 14 mm
+Board outer dimensions : 91.90 mm x 14 mm
 
 2-layer board:
 top layer: tri-slot-feedlines-F.Cu  (signal ) 
