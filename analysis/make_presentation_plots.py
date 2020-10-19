@@ -25,22 +25,65 @@ from matplotlib import lines
 if __name__ == '__main__':
     try:
         plt.close('all')
-        cu_dir = '/home/dsouthall/Projects/Greenland/hpol_prototype/data/hpol_copper_tab_testing_aug2020/s11/'
-        cu_infiles = numpy.array(glob.glob(cu_dir + '*.csv'))
-        cu_roots = numpy.unique([infile.replace('_PHASE','_FILLER').replace('_LOGMAG','_FILLER') for infile in cu_infiles])
-        cu_linestyle = '-'
-        
-        al_dir = '/home/dsouthall/Projects/Greenland/hpol_prototype/data/hpol_al_tube_testing_sep2020/s11/'
-        al_infiles = numpy.array(glob.glob(al_dir + '*.csv'))
-        al_roots = numpy.unique([infile.replace('_PHASE','_FILLER').replace('_LOGMAG','_FILLER') for infile in al_infiles])
-        al_linestyle = '--'
-
         #Params
         linewidth = 3
         alpha = 0.9
         label_fontsize = 18
         legend_fontsize = 10
-        plot_smith = True
+        plot_smith = False
+        cu_linestyle = '-'
+        al_linestyle = '--'
+        logmag_lims = (-13,0.5)
+
+
+
+        cu_dir = '/home/dsouthall/Projects/Greenland/hpol_prototype/data/hpol_copper_tab_testing_aug2020/s11/'
+        cu_infiles = numpy.array(glob.glob(cu_dir + '*.csv'))
+        cu_roots = numpy.unique([infile.replace('_PHASE','_FILLER').replace('_LOGMAG','_FILLER') for infile in cu_infiles])
+        cu_vals = numpy.zeros(len(cu_roots))
+        for root_index, root in enumerate(cu_roots):
+            shunt_inductor_value = root.split('/')[-1].split('_')[2] #nH
+            if shunt_inductor_value.lower() == 'noshunt':
+                shunt_inductor_value = 1e10
+            else:
+                shunt_inductor_value = float(shunt_inductor_value.lower().replace('nh','')) #nH
+            cu_vals[root_index] = shunt_inductor_value
+
+        cu_roots = cu_roots[numpy.argsort(cu_vals)]
+        print(cu_roots)
+
+        al_dir = '/home/dsouthall/Projects/Greenland/hpol_prototype/data/hpol_al_tube_testing_sep2020/s11/'
+        al_infiles = numpy.array(glob.glob(al_dir + '*ernieemu*.csv'))
+        al_roots_A = numpy.unique([infile.replace('_PHASE','_FILLER').replace('_LOGMAG','_FILLER') for infile in al_infiles])
+        
+        al_vals = numpy.zeros(len(al_roots_A))
+        for root_index, root in enumerate(al_roots_A):
+            shunt_inductor_value = root.split('/')[-1].split('_')[2] #nH
+            if shunt_inductor_value.lower() == 'noshunt':
+                shunt_inductor_value = 1e10
+            else:
+                shunt_inductor_value = float(shunt_inductor_value.lower().replace('nh','')) #nH
+            al_vals[root_index] = shunt_inductor_value
+        al_roots_A = al_roots_A[numpy.argsort(al_vals)]
+
+        al_infiles = numpy.array(glob.glob(al_dir + '*fionafox*.csv'))
+        al_roots_B = numpy.unique([infile.replace('_PHASE','_FILLER').replace('_LOGMAG','_FILLER') for infile in al_infiles])
+        
+        al_vals = numpy.zeros(len(al_roots_B))
+        for root_index, root in enumerate(al_roots_B):
+            shunt_inductor_value = root.split('/')[-1].split('_')[2] #nH
+            if shunt_inductor_value.lower() == 'noshunt':
+                shunt_inductor_value = 1e10
+            else:
+                shunt_inductor_value = float(shunt_inductor_value.lower().replace('nh','')) #nH
+            al_vals[root_index] = shunt_inductor_value
+        al_roots_B = al_roots_B[numpy.argsort(al_vals)]
+
+        al_roots = numpy.append(al_roots_A, al_roots_B)
+
+
+
+        
 
         #PLOT 1, All data on same plot
         if plot_smith == True:
@@ -68,6 +111,7 @@ if __name__ == '__main__':
                 linestyle = al_linestyle
 
             #Cap and inductor values
+            antenna_name = root.split('/')[-1].split('_')[1]
             shunt_inductor_value = root.split('/')[-1].split('_')[2] #nH
             if shunt_inductor_value.lower() == 'noshunt':
                 shunt_inductor_value = 0
@@ -85,11 +129,12 @@ if __name__ == '__main__':
             #Make feed, incase I want to plot Smith plot later.
             feed = SmithMatcher(freqs, logmag_vals, phase_vals, initial_capacitor_value=cap_value, initial_shunt_inductor_value=shunt_inductor_value, z_0=50)
 
-            all_ax_lm.plot(freqs/1e6, logmag_vals,linestyle = linestyle,linewidth=linewidth,alpha=alpha,label='Series C\'s = %.1f pF, Shunt L = %i nH'%(cap_value*1e12,shunt_inductor_value*1e9))
+            all_ax_lm.plot(freqs/1e6, logmag_vals,linestyle = linestyle,linewidth=linewidth,alpha=alpha,label='Series C\'s = %.1f pF, Shunt L = %i nH, %s'%(cap_value*1e12,shunt_inductor_value*1e9,antenna_name))
             if plot_smith == True:
                 all_ax_sm = feed.plotSmithChart(ax=all_ax_sm,linestyle=linestyle)
 
         all_ax_lm.set_xlim(0,1000)
+        all_ax_lm.set_ylim(logmag_lims[0],logmag_lims[1])
         #Handle Legend
         #Get artists and labels for legend and chose which ones to display
         handles, labels = all_ax_lm.get_legend_handles_labels()
@@ -131,6 +176,9 @@ if __name__ == '__main__':
                 linestyle = al_linestyle
 
             #Cap and inductor values
+            antenna_name = root.split('/')[-1].split('_')[1]
+            if antenna_name == 'davebee':
+                continue
             shunt_inductor_value = root.split('/')[-1].split('_')[2] #nH
             if shunt_inductor_value.lower() == 'noshunt':
                 shunt_inductor_value = 0
@@ -148,11 +196,12 @@ if __name__ == '__main__':
             #Make feed, incase I want to plot Smith plot later.
             feed = SmithMatcher(freqs, logmag_vals, phase_vals, initial_capacitor_value=cap_value, initial_shunt_inductor_value=shunt_inductor_value, z_0=50)
 
-            cu_ax_lm.plot(freqs/1e6, logmag_vals,linestyle = linestyle,linewidth=linewidth,alpha=alpha,label='Series C\'s = %.1f pF, Shunt L = %i nH'%(cap_value*1e12,shunt_inductor_value*1e9))
+            cu_ax_lm.plot(freqs/1e6, logmag_vals,linestyle = linestyle,linewidth=linewidth,alpha=alpha,label='Series C\'s = %.1f pF, Shunt L = %i nH, %s'%(cap_value*1e12,shunt_inductor_value*1e9,antenna_name))
             if plot_smith == True:
                 cu_ax_sm = feed.plotSmithChart(ax=cu_ax_sm,linestyle=linestyle)
 
         cu_ax_lm.set_xlim(0,1000)
+        cu_ax_lm.set_ylim(logmag_lims[0],logmag_lims[1])
         cu_ax_lm.legend(fontsize=legend_fontsize,loc='lower left')
         
 
@@ -209,6 +258,7 @@ if __name__ == '__main__':
                 al_ax_sm = feed.plotSmithChart(ax=al_ax_sm,linestyle=linestyle)
 
         al_ax_lm.set_xlim(0,1500)
+        al_ax_lm.set_ylim(logmag_lims[0],logmag_lims[1])
         al_ax_lm.legend(fontsize=legend_fontsize,loc='lower left')
 
 
@@ -242,6 +292,7 @@ if __name__ == '__main__':
                 linestyle = al_linestyle
 
             #Cap and inductor values
+            antenna_name = root.split('/')[-1].split('_')[1]
             shunt_inductor_value = root.split('/')[-1].split('_')[2] #nH
             if shunt_inductor_value.lower() == 'noshunt':
                 shunt_inductor_value = 0
@@ -259,11 +310,12 @@ if __name__ == '__main__':
             #Make feed, incase I want to plot Smith plot later.
             feed = SmithMatcher(freqs, logmag_vals, phase_vals, initial_capacitor_value=cap_value, initial_shunt_inductor_value=shunt_inductor_value, z_0=50)
 
-            best_cu_ax_lm.plot(freqs/1e6, logmag_vals,linestyle = linestyle,linewidth=linewidth,alpha=alpha,label='Series C\'s = %.1f pF, Shunt L = %i nH'%(cap_value*1e12,shunt_inductor_value*1e9))
+            best_cu_ax_lm.plot(freqs/1e6, logmag_vals,linestyle = linestyle,linewidth=linewidth,alpha=alpha,label='Series C\'s = %.1f pF, Shunt L = %i nH, %s'%(cap_value*1e12,shunt_inductor_value*1e9,antenna_name))
             if plot_smith == True:
                 best_cu_ax_sm = feed.plotSmithChart(ax=best_cu_ax_sm,linestyle=linestyle)
 
         best_cu_ax_lm.set_xlim(0,1000)
+        best_cu_ax_lm.set_ylim(logmag_lims[0],logmag_lims[1])
         best_cu_ax_lm.legend(fontsize=legend_fontsize,loc='lower left')
     except Exception as e:
         print('\nError in %s'%inspect.stack()[0][3])
