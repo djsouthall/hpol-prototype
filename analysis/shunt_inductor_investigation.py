@@ -135,6 +135,8 @@ def makeGeneralPlots3():
     This will make s11 expected v.s. measured plots in both logmag and smith chart.   As well as the general
     curve for expected points below threshold.  
     '''
+    readout_transformer_factor = 1.0
+    plot_transformed = True
     try:
         if False:
             datapath ='/home/dsouthall/Projects/Greenland/hpol_prototype/data/hpol_al_tube_testing_sep2020/s11/'
@@ -168,10 +170,10 @@ def makeGeneralPlots3():
 
         #inductor_values_nH = numpy.linspace(15,250,300)
         inductor_values_of_interest = numpy.array([])
-        inductor_values_nH = numpy.linspace(1.0,100.0,300)#numpy.array([47.0,56,100,110])
+        inductor_values_nH = numpy.linspace(1.0,100.0,50)#numpy.array([47.0,56,100,110])
         test_statistic = numpy.zeros_like(inductor_values_nH)
         
-        cap_values_pF = numpy.linspace(1.0,10.0,300)
+        cap_values_pF = numpy.linspace(1.0,10.0,50)
         cap_values_of_interest = numpy.array([])
         test_statistic_cap = numpy.zeros_like(cap_values_pF)
         fontsize=16
@@ -210,7 +212,7 @@ def makeGeneralPlots3():
         #Load intial data and make feed
         starter_freqs, starter_logmag_vals = ff.readerFieldFox(starter_logmag_infile,header=17)
         starter_freqs, starter_phase_vals = ff.readerFieldFox(starter_phase_infile,header=17)
-        feed = SmithMatcher(starter_freqs, starter_logmag_vals, starter_phase_vals, initial_capacitor_value=starter_cap_value, initial_shunt_inductor_value=starter_shunt_inductor_value, z_0=50)
+        feed = SmithMatcher(starter_freqs, starter_logmag_vals, starter_phase_vals, initial_capacitor_value=starter_cap_value, initial_shunt_inductor_value=starter_shunt_inductor_value, z_0=50, readout_transformer_factor=readout_transformer_factor)
 
 
         for c_index, C in enumerate(cap_values_pF):
@@ -298,7 +300,7 @@ def makeGeneralPlots3():
             measured_inductor_values_nH[index] = L
             freqs, logmag_vals = ff.readerFieldFox(logmag_infile,header=17)
             freqs, phase_vals = ff.readerFieldFox(phase_infile,header=17)
-            measured_feed = SmithMatcher(freqs, logmag_vals, phase_vals, initial_capacitor_value=C*1e-12, initial_shunt_inductor_value=L*1e-9, z_0=50)
+            measured_feed = SmithMatcher(freqs, logmag_vals, phase_vals, initial_capacitor_value=C*1e-12, initial_shunt_inductor_value=L*1e-9, z_0=50, readout_transformer_factor=readout_transformer_factor)
             measured_test_statistic[index] = measured_feed.getPercentBelow(db=db_cut,freq_low_cut_MHz=freq_low_cut_MHz,freq_high_cut_MHz=freq_high_cut_MHz)
             #measured_feed.plotCurrentLogMagS11(label=root)
             
