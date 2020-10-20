@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name tri-slot-hub-rescue)(type Legacy)(uri ${KIPRJMOD}/tri-slot-hub-rescue.lib)(options "")(descr ""))
+)

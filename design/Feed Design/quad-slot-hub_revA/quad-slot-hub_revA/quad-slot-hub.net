@@ -1,0 +1,43 @@
+(export (version D)
+  (design
+    (source C:\Users\eric\Desktop\projects\slot_antenna\feed\tri-slot-hub\tri-slot-hub.sch)
+    (date "12/12/2019 10:44:22 AM")
+    (tool "Eeschema (5.0.2)-1")
+    (sheet (number 1) (name /) (tstamps /)
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source tri-slot-hub.sch)
+        (comment (number 1) (value ""))
+        (comment (number 2) (value ""))
+        (comment (number 3) (value ""))
+        (comment (number 4) (value "")))))
+  (components
+    (comp (ref J1)
+      (value SMA_0732510250)
+      (footprint eo-footprints:molex_sma_0732510250)
+      (datasheet https://www.te.com/commerce/DocumentDelivery/DDEController?Action=srchrtrv&DocNm=1814400&DocType=Customer+Drawing&DocLang=English)
+      (libsource (lib eo_connectors) (part SMA_0732510250) (description "CONN SMA JACK R/A 50 OHM PCB"))
+      (sheetpath (names /) (tstamps /))
+      (tstamp 5DF2752D)))
+  (libparts
+    (libpart (lib eo_connectors) (part SMA_0732510250)
+      (description "CONN SMA JACK R/A 50 OHM PCB")
+      (docs https://www.te.com/commerce/DocumentDelivery/DDEController?Action=srchrtrv&DocNm=1814400&DocType=Customer+Drawing&DocLang=English)
+      (fields
+        (field (name Reference) J)
+        (field (name Value) SMA_0732510250)
+        (field (name Footprint) eo-footprints:molex_sma_0732510250))
+      (pins
+        (pin (num 1) (name ~) (type passive))
+        (pin (num 2) (name ~) (type passive)))))
+  (libraries
+    (library (logical eo_connectors)
+      (uri C:/Users/eric/Desktop/projects/kicad/libraries/eo-kicad-lib/symbols/eo_connectors.lib)))
+  (nets
+    (net (code 1) (name /slot_r)
+      (node (ref J1) (pin 1)))
+    (net (code 2) (name /slot_l)
+      (node (ref J1) (pin 2)))))
