@@ -1,6 +1,6 @@
 ---BOARD SPECIFICATIONS---
 File: quad-slot-hub_revA_CAM
-Date: 19-Dec. 2020
+Date: 20-Dec. 2020
 Designer: Dan Southall <dsouthall@uchicago.edu>
 --------------------------
 
