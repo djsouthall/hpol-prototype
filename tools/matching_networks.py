@@ -51,8 +51,11 @@ class SmithMatcher:
         valus given to the actual part they need to be.  I.e. if you want to move the S11 a certain amount on the Smith
         chart, the difference in values of that component is what matters.  This should allow for inital input
         measurements to include shunt inductors, which might better extrapolate to different inductor values.
+    readout_transformer_factor : float
+            This fill be used to multiply z_0 when converting back to impedance from s11.  Can be used to simulate
+            the effects of adding a transformer just before the sma. 
     '''
-    def __init__(self, freqs, logmag, unwrapped_phase, initial_capacitor_value=2.7e-12, initial_shunt_inductor_value=0.0, z_0=50):
+    def __init__(self, freqs, logmag, unwrapped_phase, initial_capacitor_value=2.7e-12, initial_shunt_inductor_value=0.0, z_0=50,readout_transformer_factor=1.0):
         try:
             self.n_elements = 1 #Theoretically we think this should be 3, but when trying to match data, 1 seems to work better.
             print('ASSUMING N_ELEMENTS = %i FOR THESE CALCULATIONS'%self.n_elements)
@@ -65,6 +68,7 @@ class SmithMatcher:
             re, im = ff.magPhaseToReIm(self.linmag,self.unwrapped_phase)
             self.complexs11 = re + 1.0j*im 
             self.z_0 = z_0
+            self.readout_transformer_factor = readout_transformer_factor
 
             self.initial_capacitor_value = numpy.copy(initial_capacitor_value)
             self.initial_shunt_inductor_value = numpy.copy(initial_shunt_inductor_value)
@@ -79,6 +83,8 @@ class SmithMatcher:
             self.adjusted_unwrapped_phase = unwrapped_phase
             re, im = ff.magPhaseToReIm(self.adjusted_linmag,self.adjusted_unwrapped_phase)
             self.adjusted_complexs11 = re + 1.0j*im 
+
+            self.calculateTransformedReadout()
 
             self.debug=False
         except Exception as e:
@@ -99,6 +105,23 @@ class SmithMatcher:
 
         self.adjusted_capacitor_value = numpy.copy(self.initial_capacitor_value)
         self.adjusted_shunt_inductor_value = numpy.copy(self.initial_shunt_inductor_value)
+
+    def calculateTransformedReadout(self):
+        try:
+            #Read in impedance as it IS (with z_0 = 50 Ohm)
+            z = ff.logToComplexZ(self.adjusted_logmag, self.adjusted_unwrapped_phase , z_0=self.z_0)
+
+            #Read out impedance as seen by SMA after transformer (if sma has transformer multiplying it's imepdance)
+            self.transformed_adjusted_complexs11 = (z - self.readout_transformer_factor*self.z_0)/(z + self.readout_transformer_factor*self.z_0)
+            self.transformed_adjusted_linmag = numpy.abs(self.transformed_adjusted_complexs11)
+            self.transformed_adjusted_logmag = ff.linToLogMag(self.transformed_adjusted_linmag)
+            self.transformed_adjusted_unwrapped_phase = numpy.unwrap(numpy.angle(self.transformed_adjusted_complexs11,deg=True),discont=360.0)
+        except Exception as e:
+            print('\nError in %s'%inspect.stack()[0][3])
+            print(e)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
 
     def forceAdjustedAsInitial(self):
         '''
@@ -124,7 +147,7 @@ class SmithMatcher:
         cut = numpy.logical_and(self.freqs >= freq_low_cut_MHz, self.freqs <= freq_high_cut_MHz)
         return sum(self.adjusted_logmag < db)/len(self.adjusted_logmag)
 
-    def plotCurrentLogMagS11(self,ax=None,fontsize=16,leg_fontsize=14,label='',plot_cut_ll=0,plot_cut_ul=1500):
+    def plotCurrentLogMagS11(self,ax=None,fontsize=16,leg_fontsize=14,label='',plot_cut_ll=0,plot_cut_ul=1500,plot_transformed=False):
         try:
             plot_cut = numpy.logical_and(self.freqs/1e6 > plot_cut_ll, self.freqs/1e6 <= plot_cut_ul)
 
@@ -141,7 +164,10 @@ class SmithMatcher:
                 #Use passed ax
                 _ax = ax
 
-            _ax.plot(self.freqs[plot_cut]/1e6, self.adjusted_logmag[plot_cut],label=label,alpha=1.0,linestyle='-')#,color=color)
+            if plot_transformed == True:
+                _ax.plot(self.freqs[plot_cut]/1e6, self.transformed_adjusted_logmag[plot_cut],label=label,alpha=1.0,linestyle='-')#,color=color)
+            else:
+                _ax.plot(self.freqs[plot_cut]/1e6, self.adjusted_logmag[plot_cut],label=label,alpha=1.0,linestyle='-')#,color=color)
             _ax.legend(loc='lower right')
 
             return _ax
@@ -152,7 +178,7 @@ class SmithMatcher:
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
 
-    def plotSmithChart(self,ax=None,linestyle='-',fontsize=16,leg_fontsize=14,label='',plot_cut_ll=0,plot_cut_ul=1500):
+    def plotSmithChart(self,ax=None,linestyle='-',fontsize=16,leg_fontsize=14,label='',plot_cut_ll=0,plot_cut_ul=1500,plot_transformed=False):
         try:
             plot_cut = numpy.logical_and(self.freqs/1e6 > plot_cut_ll, self.freqs/1e6 <= plot_cut_ul)
             
@@ -170,7 +196,10 @@ class SmithMatcher:
                 _ax = ax
                 print('Using predefined ax')
 
-            _ax.plot(numpy.real(self.adjusted_complexs11)[plot_cut], numpy.imag(self.adjusted_complexs11)[plot_cut],label=label,alpha=1.0,linestyle=linestyle)#,color=color)
+            if plot_transformed == True:
+                _ax.plot(numpy.real(self.transformed_adjusted_complexs11)[plot_cut], numpy.imag(self.transformed_adjusted_complexs11)[plot_cut],label=label,alpha=1.0,linestyle=linestyle)#,color=color)
+            else:
+                _ax.plot(numpy.real(self.adjusted_complexs11)[plot_cut], numpy.imag(self.adjusted_complexs11)[plot_cut],label=label,alpha=1.0,linestyle=linestyle)#,color=color)
             _ax.legend(loc='upper right')
 
             return _ax
@@ -256,10 +285,11 @@ class SmithMatcher:
                 print('COMPONENT NOT ADDED, VALUE NOT ACCEPTED.')
 
             self.adjusted_complexs11 = (out_z - self.z_0)/(out_z + self.z_0)
-
             self.adjusted_linmag = numpy.abs(self.adjusted_complexs11)
             self.adjusted_logmag = ff.linToLogMag(self.adjusted_linmag)
             self.adjusted_unwrapped_phase = numpy.unwrap(numpy.angle(self.adjusted_complexs11,deg=True),discont=360.0)
+
+            self.calculateTransformedReadout()
 
         except Exception as e:
             print('\nError in %s'%inspect.stack()[0][3])
@@ -333,6 +363,7 @@ class SmithMatcher:
             self.adjusted_logmag = ff.linToLogMag(self.adjusted_linmag)
             self.adjusted_unwrapped_phase = numpy.unwrap(numpy.angle(self.adjusted_complexs11,deg=True),discont=360.0)
 
+            self.calculateTransformedReadout()
         except Exception as e:
             print('\nError in %s'%inspect.stack()[0][3])
             print(e)
