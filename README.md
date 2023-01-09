@@ -1,6 +1,6 @@
 # RNO-G HPol Antenna Design
 
-This design was finalized (for the current deployment cycle), and several dozen antennas have been built with this design.  Images of the finalized design can be seen below.  The antennas consist of 8in OD alluminum tubes with custom machining for slots and structural support holes.  The centerfeed consists of a connected custom PCB circuits, supported with several waterjet nylon inserts.  Each end of the antennas have waterjet cut nylon caps, with the top having additional stucture to hold the front-end electronics.  These endcaps have rope strung through which is ultimately used to hang the antenna in the bore-hole.  
+This design was finalized (for the current deployment cycle), and several dozen antennas have been built with this design.  Images of the finalized design can be seen below.  The antennas consist of 8in OD aluminum tubes with custom machining for slots and structural support holes.  The center feed consists of a custom set of connected PCB circuits, supported with several waterjet nylon inserts.  Each end of the antennas has waterjet cut nylon caps, with the top having additional structure to hold the front-end electronics.  These endcaps have rope strung through which is ultimately used to hang the antenna in the bore-hole.  
 
 # Images
 Opaque Element             |  Transparent Element
